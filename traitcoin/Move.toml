@@ -1,0 +1,12 @@
+[package]
+name = "TraitCoin"
+version = "0.0.0"
+
+[dependencies]
+MoveStdlib = { git = "https://github.com/move-language/move.git", subdir = "language/move-stdlib", rev = "main" , addr_subst = { std = "0x1" }}
+
+[addresses]
+NamedAddr = "0xCAFE"
+
+# [dev-addresses]
+# named_addr = "0xC0FFEE"

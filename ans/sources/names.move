@@ -1,12 +1,12 @@
 module Ans::Names {
     use std::string;
-    use aptos_std::simple_map;
+    use aptos_std::table;
     use std::error;
     use aptos_std::event;
     use std::signer;
 
     struct NameMaps has key{
-        names : simple_map::SimpleMap<Name, address>,
+        names : table::Table<Name,address>
     }
 
     struct Name has drop, store{
@@ -22,7 +22,7 @@ module Ans::Names {
     const ENO_MESSAGE: u64 = 0;
 
     public fun get_address(name: string::String): string::String acquires MessageHolder {
-        NameMaps.message.find(name)
+        NameMaps.names.brorow(name);
         assert!(exists<Name>(name), error::not_found(ENO_MESSAGE));
         *&borrow_global<NameMaps>(addr).message
     }

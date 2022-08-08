@@ -1,0 +1,8 @@
+- Open your favorite terminal and navigate to where you downloaded the above example project
+- Execute the example: cargo run --bin hello-blockchain -- Message.mv
+- After a few moments it will mention that "Update the module with Alice's address, build, copy to the provided path, and press enter."
+- In the "Move Window" terminal, and for the Move file we had previously looked at:
+    - Copy Alice's address
+    - Compile the modules with Alice's address by aptos move compile --package-dir . --named-addresses HelloBlockchain=0x{alice_address_here}. Here, we replace the generic named address HelloBlockChain='_' in hello_blockchain/move.toml with Alice's Address
+    - Copy build/Examples/bytecode_modules/Message.mv to the same folder as this tutorial project code :"aptos目录下"
+- Return to your other terminal window, and press "enter" at the prompt to continue executing the rest of the code

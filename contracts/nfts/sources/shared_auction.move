@@ -1,0 +1,1 @@
+module nfts::shared_auction {}

@@ -8,10 +8,9 @@
 module nfts::auction_lib {
     use std::option::{Self, Option};
     use std::signer;
+    use aptos_token::token::{Self, Token};
     use aptos_std::coin::{Self, Coin};
-    use aptos_std::guid::GUID;
-
-    use sui::transfer;
+    use aptos_std::guid::{Self,GUID};
 
     friend nfts::auction;
     friend nfts::shared_auction;
@@ -44,7 +43,7 @@ module nfts::auction_lib {
 
     /// Creates an auction. This is executed by the owner of the asset to be
     /// auctioned.
-    public(friend) fun create_auction<T: key + store, C>(account: &signer,id: GUID, to_sell: T): Auction<T,C> {
+    public(friend) fun create_auction<T: key + store, C>(account: &signer, id: GUID, to_sell: T): Auction<T,C> {
         // A question one might asked is how do we know that to_sell
         // is owned by the caller of this entry function and the
         // answer is that it's checked by the runtime.
@@ -112,7 +111,8 @@ module nfts::auction_lib {
             } = option::extract(bid_data);
 
             send_balance(funds, owner);
-            transfer::transfer(item, highest_bidder);
+            token::deposit_token(highest_bidder,item);
+            // transfer::transfer(item, highest_bidder);
         } else {
             // no bids placed - send the item back to the original owner
             transfer::transfer(item, owner);
@@ -127,8 +127,7 @@ module nfts::auction_lib {
         auction: Auction<T,C>, 
     ) {
         let Auction { id, to_sell, owner, bid_data } = auction;
-        object::delete(id);
-
+        // object::delete(id);
         end_auction(&mut to_sell, owner, &mut bid_data);
 
         option::destroy_none(bid_data);

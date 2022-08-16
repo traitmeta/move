@@ -25,29 +25,29 @@ module nfts::auction_lib {
 
     /// Maintains the state of the auction owned by a trusted
     /// auctioneer.
-    struct Auction<T:  key + store, phantom C> has key {
+    struct Auction<phantom C> has key {
         id: GUID,
         /// Item to be sold. It only really needs to be wrapped in
         /// Option if Auction represents a shared object but we do it
         /// for single-owner Auctions for better code re-use.
-        to_sell: Option<T>,
+        to_sell: Option<Token>,
         /// Owner of the time to be sold.
         owner: address,
         /// Data representing the highest bid (starts with no bid)
         bid_data: Option<BidData<C>>,
     }
 
-    public(friend) fun auction_owner<T: key + store, C>(auction: &Auction<T,C>): address {
+    public(friend) fun auction_owner<T: key + store, C>(auction: &Auction<C>): address {
         auction.owner
     }
 
     /// Creates an auction. This is executed by the owner of the asset to be
     /// auctioned.
-    public(friend) fun create_auction<T: key + store, C>(account: &signer, id: GUID, to_sell: T): Auction<T,C> {
+    public(friend) fun create_auction<C>(account: &signer, id: GUID, to_sell: Token): Auction<C> {
         // A question one might asked is how do we know that to_sell
         // is owned by the caller of this entry function and the
         // answer is that it's checked by the runtime.
-        Auction<T,C> {
+        Auction<C> {
             id,
             to_sell: option::some(to_sell),
             owner: signer::address_of(account),
@@ -59,7 +59,7 @@ module nfts::auction_lib {
     /// (update auction if higher bid received and send coin back for
     /// bids that are too low).
     public fun update_auction<T: key + store,C>(
-        auction: &mut Auction<T,C>,
+        auction: &mut Auction<C>,
         bidder: address,
         funds: Coin<C>,
     ) {
@@ -97,11 +97,10 @@ module nfts::auction_lib {
     /// Ends the auction - transfers item to the currently highest
     /// bidder or to the original owner if no bids have been placed.
     fun end_auction<T: key + store,C>(
-        to_sell: &mut Option<T>,
-        owner: address,
+        owner: &signer,
+        to_sell: &Token,
         bid_data: &mut Option<BidData<C>>,
     ) {
-        let item = option::extract(to_sell);
         if (option::is_some<BidData<C>>(bid_data)) {
             // bids have been placed - send funds to the original item
             // owner and the item to the highest bidder
@@ -109,10 +108,12 @@ module nfts::auction_lib {
                 funds,
                 highest_bidder
             } = option::extract(bid_data);
-
-            send_balance(funds, owner);
-            token::deposit_token(highest_bidder,item);
-            // transfer::transfer(item, highest_bidder);
+            let owner_account = signer::address_of(owner);
+            send_balance(funds, owner_account);
+            
+            let token_id  = token::token_id(to_sell);
+            let amount  = token::balance_of(owner_account,*token_id);
+            token::transfer(owner, token_id, highest_bidder, amount);
         } else {
             // no bids placed - send the item back to the original owner
             transfer::transfer(item, owner);
@@ -124,7 +125,7 @@ module nfts::auction_lib {
     /// currently highest bidder or to the original owner if no bids
     /// have been placed.
     public fun end_and_destroy_auction<T: key + store,C>(
-        auction: Auction<T,C>, 
+        auction: Auction<C>, 
     ) {
         let Auction { id, to_sell, owner, bid_data } = auction;
         // object::delete(id);
@@ -138,7 +139,7 @@ module nfts::auction_lib {
     /// object) - transfers item to the currently highest bidder or to
     /// the original owner if no bids have been placed.
     public fun end_shared_auction<T: key + store,C>(
-        auction: &mut Auction<T,C>,
+        auction: &mut Auction<C>,
     ) {
         end_auction(&mut auction.to_sell, auction.owner, &mut auction.bid_data);
     }
@@ -149,19 +150,7 @@ module nfts::auction_lib {
     }
 
     /// exposes transfer::transfer
-    public fun transfer<T: key + store,C>(obj: Auction<T,C>, recipient: address) {
-        transfer::transfer(obj, recipient)
-    }
-
-    /// exposes transfer::transfer_to_object_id
-    public fun transfer_to_object_id<T: key + store,C>(
-        obj: Auction<T,C>,
-        owner_id: &mut GUID,
-    ) {
-        transfer::transfer_to_object_id(obj, owner_id)
-    }
-
-    public fun share_object<T: key + store,C>(obj: Auction<T,C>) {
-        transfer::share_object(obj)
+    public entry fun init_auction<C>(obj: Auction<C>, recipient: &signer) {
+        move_to(recipient,obj);
     }
 }

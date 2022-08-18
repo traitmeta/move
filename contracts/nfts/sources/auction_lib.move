@@ -113,9 +113,12 @@ module nfts::auction_lib {
             
             let token_id  = token::token_id(to_sell);
             let amount  = token::balance_of(owner_account,*token_id);
-            token::transfer(owner, token_id, highest_bidder, amount);
+            token::transfer(owner, *token_id, highest_bidder, amount);
         } else {
             // no bids placed - send the item back to the original owner
+           // todo first to decide the token save in which one account?
+           // if was in owner, he can be transfer to other in acution processing;
+           // so the token must be in the auction contract;
             transfer::transfer(item, owner);
         };
     }

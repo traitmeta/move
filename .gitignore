@@ -12,3 +12,4 @@ Cargo.lock
 build
 *.bpl
 **/target/
+.aptos

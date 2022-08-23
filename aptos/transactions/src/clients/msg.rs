@@ -40,7 +40,7 @@ impl MsgClient {
     ) -> String {
         let message_hex = hex::encode(message.as_bytes());
         let payload = serde_json::json!({
-            "type": "script_function_payload",
+            "type": "entry_function_payload",
             "function": format!("0x{}::Message::set_message", contract_address),
             "type_arguments": [],
             "arguments": [message_hex]

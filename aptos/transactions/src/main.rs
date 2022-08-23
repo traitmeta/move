@@ -1,17 +1,64 @@
 use std::env;
 
-use transactions::{accounts::account::Account, clients::{faucet::FaucetClient, client::RestClient, msg::MsgClient}};
+use transactions::{
+    accounts::account::Account,
+    clients::{client::RestClient, faucet::FaucetClient, msg::MsgClient},
+};
 
-const TESTNET_URL: &str = "https://fullnode.devnet.aptoslabs.com";
-const FAUCET_URL: &str = "https://faucet.devnet.aptoslabs.com";
-// const TESTNET_URL: &str = "http://127.0.0.1:8000";
-// const FAUCET_URL: &str = "http://127.0.0.1:8000";
+const TESTNET_URL: &str = "https://fullnode.devnet.aptoslabs.com/v1";
+const FAUCET_URL: &str = "https://faucet.devnet.aptoslabs.com/";
 
 fn main() -> () {
-    msg_move()
+    msg_move_not_faucet()
 }
 
-fn msg_move(){
+fn msg_move_not_faucet() {
+    let args: Vec<String> = env::args().collect();
+    println!("{:?}", args);
+
+    assert_eq!(
+        args.len(),
+        2,
+        "Expecting an argument that points to the helloblockchain module"
+    );
+
+    let client = MsgClient::new(TESTNET_URL.to_string());
+    // Create two accounts, Alice and Bob
+    let key_bytes =
+        hex::decode("633ccd9e612dbd8fad2112643e4d8b9aa30df089e1c10cc29f044fff863cdbcf").unwrap();
+    println!("private:{:?}", key_bytes);
+    let mut alice = Account::new(Some(key_bytes));
+
+    println!("\n=== Addresses ===");
+    println!("Alice: 0x{}", alice.address());
+
+    println!("\n=== Balances ===");
+    println!(
+        "Alice: {:?}",
+        client.rest_client.account_balance(&alice.address())
+    );
+
+    let module_path = args.get(1).unwrap();
+    let module_hex = hex::encode(std::fs::read(module_path).unwrap());
+
+    println!("\n=== Testing Alice ===");
+    println!("Publishing...");
+    let mut tx_hash = client.publish_module(&mut alice, &module_hex);
+    client.rest_client.wait_for_transaction(&tx_hash);
+    println!(
+        "Initial value: {:?}",
+        client.get_message(&alice.address(), &alice.address())
+    );
+    println!("Setting the message to \"Hello, Blockchain\"");
+    tx_hash = client.set_message(&alice.address(), &mut alice, &"Hello, Blockchain");
+    client.rest_client.wait_for_transaction(&tx_hash);
+    println!(
+        "New value: {:?}",
+        client.get_message(&alice.address(), &alice.address())
+    );
+}
+
+fn msg_move() {
     let args: Vec<String> = env::args().collect();
     println!("{:?}", args);
 
@@ -87,7 +134,8 @@ fn msg_move(){
         client.get_message(&alice.address(), &bob.address())
     );
 }
-fn first_move(){
+
+fn first_move() {
     let rest_client = RestClient::new(TESTNET_URL.to_string());
     let faucet_client = FaucetClient::new(FAUCET_URL.to_string(), rest_client.clone());
 

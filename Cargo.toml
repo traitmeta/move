@@ -1,0 +1,2 @@
+[workspace]
+members = ["aptos/dapps","aptos/transactions"]

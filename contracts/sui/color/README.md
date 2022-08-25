@@ -1,5 +1,9 @@
 # Record
 
+## 心得体会
+
+1. 每次publish, 都会创建一个UID， 也就是合约一直存在，如果升级的话，并没有覆盖掉原来的合约，而是一个新的；
+
 ## run record
 
 - sui client publish --path ../ --gas-budget 10000
@@ -59,3 +63,12 @@
     id: 0xa61de7bb233df7870bca7ed3459f1261f393ec7f
     red: 0
 ```
+
+
+sui client call --gas-budget 1000 --package $PACKAGE --module "rgb" --function "transfer" --args \"0x13db212f43507081be243dbd18d79df761a29953\" \"0x774b97e89a2b1df90c62ddd528bf17b8eb2658d4\"
+
+
+sui client objects --address 0x774b97e89a2b1df90c62ddd528bf17b8eb2658d4
+
+
+sui client call --gas-budget 1000 --package 0x95cd99feeeb3f49a52f2b4267743f551c828d5b2 --module "rgb" --function "delete" --args \"0xa61de7bb233df7870bca7ed3459f1261f393ec7f\"

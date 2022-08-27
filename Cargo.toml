@@ -1,2 +1,2 @@
 [workspace]
-members = ["aptos/dapps","aptos/transactions"]
+members = ["aptos/dapps","aptos/transactions","sui/clients"]

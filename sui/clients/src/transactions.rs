@@ -1,6 +1,6 @@
 use std::str::FromStr;
 use sui_sdk::{
-    crypto::{KeystoreType, FileBasedKeystore},
+    crypto::KeystoreType,
     types::{
         base_types::{ObjectID, SuiAddress},
         crypto::Signature,
@@ -9,8 +9,7 @@ use sui_sdk::{
     SuiClient,
 };
 
-pub async fn default_conduct_transaction() -> Result<(), anyhow::Error> {
-    let sui = SuiClient::new_rpc_client("https://gateway.devnet.sui.io:443", None).await?;
+pub async fn default_conduct_transaction(sui: &SuiClient) -> Result<(), anyhow::Error> {
     // Load keystore from ~/.sui/sui_config/sui.keystore
     let keystore_path = match dirs::home_dir() {
         Some(v) => v.join(".sui").join("sui_config").join("sui.keystore"),

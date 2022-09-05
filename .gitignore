@@ -13,3 +13,5 @@ build
 *.bpl
 **/target/
 .aptos
+
+**/*.log.*

@@ -7,6 +7,7 @@ use sui_sdk::{
 pub mod address;
 pub mod transactions;
 pub mod ws;
+pub mod block;
 
 pub fn local_keystore() -> Result<SuiKeystore, anyhow::Error> {
     // Load keystore from ~/.sui/sui_config/sui.keystore

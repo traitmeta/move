@@ -1,3 +1,4 @@
+use futures::TryFutureExt;
 use std::str::FromStr;
 use sui_sdk::{
     crypto::KeystoreType,
@@ -19,7 +20,7 @@ pub async fn default_conduct_transaction(
     let transfer_tx = build_transaction_sui(sui, from, to, gas).await?;
 
     // Sign the transaction
-    let signature = sign_transaction(from, &transfer_tx);
+    let signature = sign_transaction(from, &transfer_tx).unwrap();
 
     // Execute the transaction
     let transaction_response = sui
@@ -53,7 +54,7 @@ pub async fn build_transaction_sui(
 }
 
 // why build transaction need client?
-pub async fn sign_transaction(
+pub fn sign_transaction(
     from: &str,
     data: &TransactionData,
 ) -> Result<Signature, anyhow::Error> {

@@ -1,6 +1,6 @@
 use sui_sdk::SuiClient;
 
-struct ExplorerCli {
+pub struct ExplorerCli {
     cli: SuiClient,
 }
 
@@ -10,7 +10,7 @@ impl ExplorerCli {
         Self { cli: sui }
     }
 
-    async fn get_block(&self) -> u64 {
+    async fn get_tx_version(&self) -> u64 {
         self.cli
             .read_api()
             .get_total_transaction_number()
@@ -30,9 +30,9 @@ mod tests {
             .build()
             .unwrap();
 
-        let cli = rt.block_on(ExplorerCli::new("https://gateway.devnet.sui.io:443"));
-        let num = rt.block_on(cli.get_block());
-
+        let cli = rt.block_on(ExplorerCli::new("https://fullnode.devnet.sui.io:443"));
+        let num = rt.block_on(cli.get_tx_version());
+        println!("{}", num);
         assert_eq!(num > 50799, true, "split?");
     }
 }

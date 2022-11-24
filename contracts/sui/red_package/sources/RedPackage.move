@@ -19,7 +19,7 @@ module red_package::package{
         claimed: vector<address>,
     }
 
-    public fun create_fair<TokenType: store>(pay_token: Coin<TokenType>, per_amount: u64, count: u64, ctx: &mut TxContext) {
+    public entry fun create_fair<TokenType: store>(pay_token: Coin<TokenType>, per_amount: u64, count: u64, ctx: &mut TxContext) {
         let amount = per_amount * count;
         assert!(coin::value(&pay_token) > amount, INSUFFICIENT_AMOUNT);
 
@@ -33,7 +33,7 @@ module red_package::package{
         transfer::share_object(redPackage);
     }
 
-    public fun claim<TokenType: store>(red_package_info: &mut RedPackage<TokenType>, ctx: &mut TxContext) {
+    public entry fun claim<TokenType: store>(red_package_info: &mut RedPackage<TokenType>, ctx: &mut TxContext) {
         let sender = tx_context::sender(ctx);
         let rest = coin::value(&red_package_info.tokens);
         assert!(rest > red_package_info.per_amount, REDPACKAGE_IS_EMPTY);
@@ -59,3 +59,5 @@ module red_package::package{
     }
 
 }
+
+// TODO add test
